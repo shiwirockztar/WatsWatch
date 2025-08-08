@@ -1,0 +1,7 @@
+#ifndef WIFI_CONFIG_H
+#define WIFI_CONFIG_H
+
+#define WIFI_SSID "ALICIA ISABEL"
+#define WIFI_PASSWORD "39014972"
+
+#endif // WIFI_CONFIG_H
