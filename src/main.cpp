@@ -26,6 +26,7 @@ const uint8_t panicButtonPin = 5;
 
 // Variable global para indicar acceso recibido
 volatile bool accesoRecibido = false;
+String mensajeAcceso = "";
 
 //Constantes OLED
 #define SCREEN_WIDTH 128 
@@ -101,7 +102,7 @@ void loop(){
 
   //checkTemperature();
   checkPanicButton();
-  delay(50);
+  delay(500);
 }
 
 // Funciones de apoyo
@@ -140,7 +141,7 @@ void postData (String url)
     }
     else
     {
-        Serial.println("Error.");
+        //Serial.println("Error.");
     }
     http.end(); // una vez terminada la llamada a la API, finalizamos el cliente
 }
@@ -157,8 +158,9 @@ void checkPanicButton()
     }
         // Si se recibió acceso por MQTT, enviar mensaje a WhatsApp
     if (accesoRecibido) {
-        messageToWhatsApp("acceso");
-        accesoRecibido = false; // Resetear bandera
+      messageToWhatsApp(mensajeAcceso);
+        //messageToWhatsApp("acceso");
+        mensajeAcceso = "";     // Limpiar mensaje
     }
 }
 
@@ -182,6 +184,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Mensaje recibido: ");
       Serial.println(resultS);
   //Comando para deserealizar el Json recibido
+  
   DeserializationError error = deserializeJson(doc1, resultS);
   if (error) 
   {
@@ -189,7 +192,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print(F("deserializeJson() failed with code "));
     Serial.println(error.f_str());
   }
-
   // Debido a que estamos suscritos a 2 tópicos, se crean condiciones
   //dependiendo del tópico que se recibe el mensaje
   if(String(topic) == "ESP1/Val")
@@ -212,9 +214,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   {
       Serial.print("Tópico LEO: ");
       Serial.println(resultS);
+      mensajeAcceso = resultS;
+      accesoRecibido = true;
+      /*
       if (resultS == "acceso") {
-          accesoRecibido = true;
+        accesoRecibido = true;
       }
+      */
   }
  // aqui si el topico no es conocido imprima el mensaje de error
   if(String(topic) == "leo")
